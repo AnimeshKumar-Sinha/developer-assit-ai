@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: potpie_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: momentum
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  neo4j:
+    image: neo4j:latest
+    container_name: potpie_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/mysecretpassword
+      NEO4JLABS_PLUGINS: '["apoc"]' # Add this line to include APOC plugin
+      NEO4J_dbms_security_procedures_unrestricted: 'apoc.*' # Allow APOC procedures
+      NEO4J_dbms_memory_transaction_total_max: 0
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    container_name: potpie_redis_broker
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
